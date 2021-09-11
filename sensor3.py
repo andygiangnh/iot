@@ -16,19 +16,19 @@ curses.cbreak()
 screen.keypad(True)
 
 exitFlag = False
-
+block = False
 
 def sensor():
-    block = False
+    block = True
     while True:
-        if GPIO.input(32) == 1:
+        if GPIO.input(32) == 0:
             if not block:
                 print("block")
-                GPIO.output(31,True)
-                block = True
-        elif GPIO.input(32) == 0:
-            block = False
             GPIO.output(31,False)
+            block = True
+        elif GPIO.input(32) == 1:
+            block = False
+            GPIO.output(31,True)
 
         if exitFlag:
             break
