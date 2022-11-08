@@ -57,6 +57,8 @@ exitFlag = False
 isBlocked = False
 
 def sensor():
+    global exitFlag
+    global isBlocked
     while True:
         if GPIO.input(32) == 0:
             if not isBlocked:
