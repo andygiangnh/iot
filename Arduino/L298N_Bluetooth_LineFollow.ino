@@ -25,6 +25,7 @@ int in4Pin = 8;
 char command;
 int speed;
 int turnSpeed;
+int pump = 9;
 
 void setup()
 {
@@ -35,6 +36,8 @@ void setup()
   pinMode(ena2, OUTPUT);
   pinMode(in3Pin, OUTPUT);
   pinMode(in4Pin, OUTPUT);
+
+  pinMode(pump, OUTPUT);
 
   speed = 0;
   stop();
@@ -138,6 +141,14 @@ void loop()
         break;
       case 'x':
         autoMode = 0;
+        speed = 0;
+        turnSpeed = 0;
+        break;
+      case 'V':
+        digitalWrite(pump, HIGH);
+        break;
+      case 'v':
+        digitalWrite(pump, LOW);
         speed = 0;
         turnSpeed = 0;
         break;
