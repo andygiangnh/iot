@@ -4,7 +4,7 @@
 #define FrontSen 11
 
 SoftwareSerial bluetoothSerial(12, 13);
-int autoMode = 2, ena = 3, in1 = 4, in2 = 5, enb = 6, in3 = 7, in4 = 8, pump = 9;
+int ena = 3, in1 = 4, in2 = 5, enb = 6, in3 = 7, in4 = 8, pump = 9;
 char command;
 int speed = 255;
 void setup() {
@@ -65,63 +65,64 @@ void Left() {
 }
 
 void loop() {
+  if (Serial.available() > 0) {
+    command = Serial.readStringUntil('\n');
+  }
+
   if (bluetoothSerial.available() > 0) {
     command = bluetoothSerial.read();
   }
-  if (autoMode > 0) {
-    
-  } else {
-    switch(command) {
-      
-      case 'F':
-        analogWrite(3, speed);
-	      analogWrite(6, speed);
-        Forward();
-        break;
-      case 'B':
-        analogWrite(3, speed);
-	      analogWrite(6, speed);
-        Backward();
-        break;
-      case 'R':
-        analogWrite(3, speed);
-	      analogWrite(6, speed);
-        Right();
-        break;
-      case 'L':
-        analogWrite(3, speed);
-	      analogWrite(6, speed);
-        Left();
-        break;
-      case 'I':
-        analogWrite(3, 0.28*speed);
-	      analogWrite(6, speed);
-        Forward();
-        break;
-      case 'G':
-        analogWrite(3, speed);
-	      analogWrite(6, 0.28*speed);
-        Forward();
-        break;
-      case 'J':
-        analogWrite(3, speed);
-	      analogWrite(6, 0.28*speed);
-        Backward();
-        break;
-      case 'H':
-        analogWrite(3, 0.28*speed);
-	      analogWrite(6, speed);
-        Backward();
-        break;
-      case 'W':
-        startPump();
-        break;
-      case 'w':
-        stopPump();
-        break;
-      default:
-        stop();
-        break;
-    }
+  
+  switch(command) {      
+    case 'F':
+      analogWrite(3, speed);
+      analogWrite(6, speed);
+      Forward();
+      break;
+    case 'B':
+      analogWrite(3, speed);
+      analogWrite(6, speed);
+      Backward();
+      break;
+    case 'R':
+      analogWrite(3, speed);
+      analogWrite(6, speed);
+      Right();
+      break;
+    case 'L':
+      analogWrite(3, speed);
+      analogWrite(6, speed);
+      Left();
+      break;
+    case 'I':
+      analogWrite(3, 0.28*speed);
+      analogWrite(6, speed);
+      Forward();
+      break;
+    case 'G':
+      analogWrite(3, speed);
+      analogWrite(6, 0.28*speed);
+      Forward();
+      break;
+    case 'J':
+      analogWrite(3, speed);
+      analogWrite(6, 0.28*speed);
+      Backward();
+      break;
+    case 'H':
+      analogWrite(3, 0.28*speed);
+      analogWrite(6, speed);
+      Backward();
+      break;
+    case 'W':
+      startPump();
+      break;
+    case 'w':
+      stopPump();
+      break;
+    default:
+      stop();
+      break;
   }
+  
 }
