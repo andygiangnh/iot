@@ -10,7 +10,7 @@ ser = None
 def home():
     global ser
     if(ser == None or ser.isOpen() == False):
-        ser = serial.Serial('COM11', 9600)
+        ser = serial.Serial('COM11', 115200)
         time.sleep(3)
         ser.reset_input_buffer
     return "Serial connected"
@@ -31,4 +31,4 @@ def move(direction):
     return "Move {}".format(direction)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True)
