@@ -5,7 +5,7 @@ GPIO.setmode(GPIO.BCM)
 TRIG = 16
 ECHO = 18
 
-print "Distance Measurement In Progress"
+print ("Distance Measurement In Progress")
 
 GPIO.setup(TRIG,GPIO.OUT)
 GPIO.setup(ECHO,GPIO.IN)
@@ -13,7 +13,7 @@ try:
     while True:
         
         GPIO.output(TRIG, False)
-        print "Waiting For Sensor To Settle"
+        print ("Waiting For Sensor To Settle")
         time.sleep(2)
         
         GPIO.output(TRIG, True)
@@ -32,7 +32,7 @@ try:
         
         distance = round(distance, 2)
         
-        print "Distance: ",distance,"cm"
+        print ("Distance: {} cm".format(distance))
         
 except KeyboardInterrupt: # If there is a KeyboardInterrupt (when you press ctrl+c), exit the program
     print("Cleaning up!")
