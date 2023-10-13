@@ -51,17 +51,17 @@ void Backward() {
 	digitalWrite(8, HIGH);
 
 }void Right() {
-	digitalWrite(4, HIGH);
-	digitalWrite(5, LOW);
-	digitalWrite(7, LOW);
-	digitalWrite(8, HIGH);
-}
-
-void Left() {
 	digitalWrite(4, LOW);
 	digitalWrite(5, HIGH);
 	digitalWrite(7, HIGH);
 	digitalWrite(8, LOW);
+}
+
+void Left() {
+	digitalWrite(4, HIGH);
+	digitalWrite(5, LOW);
+	digitalWrite(7, LOW);
+	digitalWrite(8, HIGH);
 }
 
 void loop() {
@@ -120,6 +120,36 @@ void loop() {
       break;
     case 'w':
       stopPump();
+      break;
+    case '1':
+      speed = 100;
+      break;
+    case '2':
+      speed = 120;
+      break;
+    case '3':
+      speed = 140;
+      break;
+    case '4':
+      speed = 150;
+      break;
+    case '5':
+      speed = 165;
+      break;
+    case '6':
+      speed = 175;
+      break;
+    case '7':
+      speed = 190;
+      break;
+    case '8':
+      speed = 200;
+      break;
+    case '9':
+      speed = 210;
+      break;
+    case 'q':
+      speed = 220;
       break;
     default:
       stop();
