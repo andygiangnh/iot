@@ -21,7 +21,7 @@ void setup() {
 	analogWrite(ena, 200);
 	analogWrite(enb, 200);
 
-  Serial.begin(9600);
+  Serial.begin(115200);
   bluetoothSerial.begin(9600);
 
 }
@@ -66,7 +66,8 @@ void Left() {
 
 void loop() {
   if (Serial.available() > 0) {
-    command = Serial.readStringUntil('\n');
+    String cmd = Serial.readStringUntil('\n');
+    command = cmd.charAt(0);
   }
 
   if (bluetoothSerial.available() > 0) {
