@@ -1,12 +1,16 @@
 #include <SoftwareSerial.h>
-#define LeftSen 2
-#define RightSen 10
-#define FrontSen 11
+#define LeftSensor 2
+#define RightSensor 10
+#define ForwardSensor 11
 
 SoftwareSerial bluetoothSerial(12, 13);
-int ena = 3, in1 = 4, in2 = 5, enb = 6, in3 = 7, in4 = 8, pump = 9;
+int ena = 3, in1 = 4, in2 = 5, enb = 6, in3 = 7, in4 = 8;
+int pump = 9;
+int autoMode = 0;
+int fire = 0;
 char command;
 int speed = 255;
+int workingOnFire = 0;
 void setup() {
 	pinMode(ena, OUTPUT);
 	pinMode(in1, OUTPUT);
@@ -15,9 +19,9 @@ void setup() {
 	pinMode(in3, OUTPUT);
 	pinMode(in4, OUTPUT);
 	pinMode(pump, OUTPUT);
-	pinMode(LeftSen, INPUT);
-	pinMode(RightSen, INPUT);
-	pinMode(FrontSen, INPUT);
+	pinMode(LeftSensor, INPUT);
+	pinMode(RightSensor, INPUT);
+	pinMode(ForwardSensor, INPUT);
 	analogWrite(ena, 200);
 	analogWrite(enb, 200);
 
@@ -66,8 +70,15 @@ void Left() {
 
 void loop() {
   if(autoMode > 0) {
+    if (Serial.available() > 0) {
+      String firework = Serial.readStringUntil('\n');
+      if(firework == "working_on_fire_out") {
+        workingOnFire = 1;
+      }
+    }
     if (digitalRead(LeftSensor) == 1 && digitalRead(RightSensor) == 1 && digitalRead(ForwardSensor) == 1) 
-    {    
+    {
+      fire = 0;    
       stop();
     }
     
@@ -76,14 +87,16 @@ void loop() {
       fire = 1;
       while(digitalRead(ForwardSensor) == 0){
         // Print the "Fire Dectected" command to Raspberry Pi
-        Serial.println("fire_start");
+        if(!workingOnFire) {
+          Serial.println("fire_start");
+        }
       }
       stop();
     }
     
     else if (digitalRead(LeftSensor) == 0)
     {
-      speed = 200;
+      speed = 220;
       analogWrite(ena, speed);
 	    analogWrite(enb, speed);
       Left();
@@ -91,13 +104,13 @@ void loop() {
     
     else if (digitalRead(RightSensor) == 0) 
     {
-      speed = 200;
+      speed = 220;
       analogWrite(ena, speed);
 	    analogWrite(enb, speed);
       Right();
     }
     
-    delay(300);//change this value to increase the distance
+    delay(320);//change this value to increase the distance
  
   }
 

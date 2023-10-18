@@ -72,9 +72,15 @@ def main():
         time.sleep(1)
 
         while True:
+            # action 1
+            time_now = time.time()
+            if time_now - last_time_check_fire >= reset_fire_check:
+                last_time_check_fire = time_now
+                print("Send Arduino Raspberry Pi is working on Fire")
+                ser.write("working_on_fire_out\n".encode('utf-8'))
             # action 2
             if ser.in_waiting > 0:
-                fire_cmd = int(ser.readline().decode('utf-8').rstrip())
+                fire_cmd = ser.readline().decode('utf-8').rstrip()
                 if(fire_cmd == "fire_start"):
                     print("Received Fire Start Moving: " + str(fire_cmd))
                     break
