@@ -26,11 +26,11 @@ def sensor():
     print ("Distance Measurement In Progress")
 
     try:
+        GPIO.output(TRIG, False)
+        print ("Waiting For Sensor To Settle")
+        time.sleep(2)
+
         while True and not exitFlag:
-            GPIO.output(TRIG, False)
-            print ("Waiting For Sensor To Settle")
-            time.sleep(2)
-            
             GPIO.output(TRIG, True)
             time.sleep(0.00001)
             GPIO.output(TRIG, False)
