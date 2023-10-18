@@ -65,6 +65,42 @@ void Left() {
 }
 
 void loop() {
+  if(autoMode > 0) {
+    if (digitalRead(LeftSensor) == 1 && digitalRead(RightSensor) == 1 && digitalRead(ForwardSensor) == 1) 
+    {    
+      stop();
+    }
+    
+    else if (digitalRead(ForwardSensor) == 0) 
+    {
+      fire = 1;
+      while(digitalRead(ForwardSensor) == 0){
+        // Print the "Fire Dectected" command to Raspberry Pi
+        Serial.println("fire_start");
+      }
+      stop();
+    }
+    
+    else if (digitalRead(LeftSensor) == 0)
+    {
+      speed = 200;
+      analogWrite(ena, speed);
+	    analogWrite(enb, speed);
+      Left();
+    }
+    
+    else if (digitalRead(RightSensor) == 0) 
+    {
+      speed = 200;
+      analogWrite(ena, speed);
+	    analogWrite(enb, speed);
+      Right();
+    }
+    
+    delay(300);//change this value to increase the distance
+ 
+  }
+
   if (Serial.available() > 0) {
     String cmd = Serial.readStringUntil('\n');
     command = cmd.charAt(0);
@@ -74,45 +110,52 @@ void loop() {
     command = bluetoothSerial.read();
   }
   
-  switch(command) {      
+  switch(command) {
+    case 'X':
+      autoMode = 1;
+      break;
+    case 'x':
+      autoMode = 0;
+      speed = 0;
+      break;
     case 'F':
-      analogWrite(3, speed);
-      analogWrite(6, speed);
+      analogWrite(ena, speed);
+      analogWrite(enb, speed);
       Forward();
       break;
     case 'B':
-      analogWrite(3, speed);
-      analogWrite(6, speed);
+      analogWrite(ena, speed);
+      analogWrite(enb, speed);
       Backward();
       break;
     case 'R':
-      analogWrite(3, speed);
-      analogWrite(6, speed);
+      analogWrite(ena, speed);
+      analogWrite(enb, speed);
       Right();
       break;
     case 'L':
-      analogWrite(3, speed);
-      analogWrite(6, speed);
+      analogWrite(ena, speed);
+      analogWrite(enb, speed);
       Left();
       break;
     case 'I':
-      analogWrite(3, 0.28*speed);
-      analogWrite(6, speed);
+      analogWrite(ena, 0.28*speed);
+      analogWrite(enb, speed);
       Forward();
       break;
     case 'G':
-      analogWrite(3, speed);
-      analogWrite(6, 0.28*speed);
+      analogWrite(ena, speed);
+      analogWrite(enb, 0.28*speed);
       Forward();
       break;
     case 'J':
-      analogWrite(3, speed);
-      analogWrite(6, 0.28*speed);
+      analogWrite(ena, speed);
+      analogWrite(enb, 0.28*speed);
       Backward();
       break;
     case 'H':
-      analogWrite(3, 0.28*speed);
-      analogWrite(6, speed);
+      analogWrite(ena, 0.28*speed);
+      analogWrite(enb, speed);
       Backward();
       break;
     case 'W':

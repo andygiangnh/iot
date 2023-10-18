@@ -14,6 +14,9 @@ ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1.0)
 time.sleep(3)
 ser.reset_input_buffer
 
+last_time_check_fire = time.time()
+reset_fire_check = 10.0
+
 ## DISTANCE SENSOR ##
 ### Sensor
 exitFlag = False
@@ -67,6 +70,15 @@ def main():
         time.sleep(1)
         ser.write("6\n".encode('utf-8'))
         time.sleep(1)
+
+        while True:
+            # action 2
+            if ser.in_waiting > 0:
+                fire_cmd = int(ser.readline().decode('utf-8').rstrip())
+                if(fire_cmd == "fire_start"):
+                    print("Received Fire Start Moving: " + str(fire_cmd))
+                    break
+            time.sleep(2)
 
         while distance > 25:
             if(distance > 25):
