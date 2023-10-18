@@ -31,6 +31,10 @@ def sensor():
         time.sleep(2)
 
         while True and not exitFlag:
+            GPIO.output(TRIG, False)
+            print ("Waiting For Sensor To Settle")
+            time.sleep(1)
+
             GPIO.output(TRIG, True)
             time.sleep(0.00001)
             GPIO.output(TRIG, False)
@@ -45,7 +49,7 @@ def sensor():
             distance = pulse_duration * 17150        
             distance = round(distance, 2)
             if(distance <= 25):
-                ser.write("S".encode('utf-8'))
+                ser.write("S\n".encode('utf-8'))
                 time.sleep(1)
 
             print ("Distance: {} cm".format(distance))
@@ -59,17 +63,17 @@ def main():
         global ser
         global exitFlag
         
-        ser.write("S".encode('utf-8'))
+        ser.write("S\n".encode('utf-8'))
         time.sleep(1)
-        ser.write("6".encode('utf-8'))
+        ser.write("6\n".encode('utf-8'))
         time.sleep(1)
 
-        while distance > 15:
-            if(distance > 15):
-                ser.write("F".encode('utf-8'))
+        while distance > 25:
+            if(distance > 25):
+                ser.write("F\n".encode('utf-8'))
                 time.sleep(1.0)
                 print("Sending F")
-            ser.write("S".encode('utf-8'))
+            ser.write("S\n".encode('utf-8'))
             print("Sending S")
             time.sleep(1.0)
         
@@ -77,9 +81,9 @@ def main():
         time.sleep(2)
         # Start Pump
         print("Start pumping...")
-        ser.write("W".encode('utf-8'))
+        ser.write("W\n".encode('utf-8'))
         time.sleep(3)
-        ser.write("w".encode('utf-8'))
+        ser.write("w\n".encode('utf-8'))
         time.sleep(2)
             
     except KeyboardInterrupt: # If there is a KeyboardInterrupt (when you press ctrl+c), exit the program
