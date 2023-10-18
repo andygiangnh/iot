@@ -65,6 +65,9 @@ def main():
         global distance
         global ser
         global exitFlag
+
+        global last_time_check_fire
+        global reset_fire_check
         
         ser.write("S\n".encode('utf-8'))
         time.sleep(1)
