@@ -61,11 +61,11 @@ def main():
         
         ser.write("S".encode('utf-8'))
         time.sleep(1)
-        ser.write("5".encode('utf-8'))
+        ser.write("6".encode('utf-8'))
         time.sleep(1)
 
-        while distance > 25:
-            if(distance > 25):
+        while distance > 15:
+            if(distance > 15):
                 ser.write("F".encode('utf-8'))
                 time.sleep(1.0)
                 print("Sending F")
