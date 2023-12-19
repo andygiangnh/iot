@@ -11,6 +11,8 @@ int fire = 0;
 char command;
 int speed = 255;
 int workingOnFire = 0;
+int checkRound = 0;
+int delayCheck = 200;
 void setup() {
 	pinMode(ena, OUTPUT);
 	pinMode(in1, OUTPUT);
@@ -78,20 +80,25 @@ void loop() {
     }
     if (digitalRead(LeftSensor) == 1 && digitalRead(RightSensor) == 1 && digitalRead(ForwardSensor) == 1) 
     {
-      fire = 0;    
-      stop();
-    }
-    
-    else if (digitalRead(ForwardSensor) == 0) 
-    {
-      fire = 1;
-      while(digitalRead(ForwardSensor) == 0){
-        // Print the "Fire Dectected" command to Raspberry Pi
-        if(!workingOnFire) {
-          Serial.println("fire_start");
-        }
+      fire = 0;
+      // turn to check fire
+      speed = 180;
+
+      analogWrite(ena, speed);
+	    analogWrite(enb, speed);
+
+      if(checkRound < 10) {
+        Left();
+        delay(200);
+        delayCheck = delayCheck * 2;
+      }
+      else {
+        checkRound = 0;
+        delayCheck = 200;
       }
       stop();
+      delay(delayCheck);//change this value to increase the distance
+      
     }
     
     else if (digitalRead(LeftSensor) == 0)
@@ -100,6 +107,8 @@ void loop() {
       analogWrite(ena, speed);
 	    analogWrite(enb, speed);
       Left();
+      Serial.println("fire_on"); // Tell Raspberry Pi that "fire is on"
+      delay(320);//change this value to increase the distance
     }
     
     else if (digitalRead(RightSensor) == 0) 
@@ -108,9 +117,27 @@ void loop() {
       analogWrite(ena, speed);
 	    analogWrite(enb, speed);
       Right();
+      Serial.println("fire_on"); // Tell Raspberry Pi that "fire is on"
+      delay(320);//change this value to increase the distance
     }
-    
-    delay(320);//change this value to increase the distance
+
+    else if (digitalRead(ForwardSensor) == 0) 
+    {
+      fire = 1;
+      int round = 10;
+      while(digitalRead(ForwardSensor) == 0 && round < 10){
+        // Print the "Fire Dectected" command to Raspberry Pi
+        //if(!workingOnFire) {
+          speed = 220;
+          analogWrite(ena, speed);
+          analogWrite(enb, speed);
+          Forward();
+          delay(50);//change this value to increase the distance
+          Serial.println("fire_on");
+        //}
+      }
+      stop();
+    }    
  
   }
 
@@ -129,7 +156,7 @@ void loop() {
       break;
     case 'x':
       autoMode = 0;
-      speed = 0;
+      stop();
       break;
     case 'F':
       analogWrite(ena, speed);
