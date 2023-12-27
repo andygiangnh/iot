@@ -6,7 +6,7 @@ motor = Motor(3, 5, 7, 15, 13, 11)
 while True:
     joystick = get_joystick()
     speed = 0 - joystick['hat1']
-    turn = 0 - joystick['hat0']
+    turn = joystick['hat0']
     if joystick['axis1'] != 0:
         speed = joystick['axis1']
     if joystick['axis0'] != 0:
