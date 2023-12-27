@@ -39,6 +39,7 @@ class RecordCSV:
             skip = True  # skip the ongoing scanning data point of current frame
             line = ''
             arr = np.empty(LIDAR_RESOLUTION, dtype=object)
+            self.lidar.clean_input()
             for measurement in self.lidar.iter_measures():
                 if self.stop_flag:
                     break
