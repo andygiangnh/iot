@@ -44,12 +44,15 @@ def get_joystick(name=''):
 
 
 def main():
-    print(get_joystick()) # To get all values
-    sleep(0.05)
-    # print(get_joystick('start'))  # To get a single value
-    sleep(0.05)
+    while True:
+        joystick = get_joystick() # To get all values
+        for k,v in joystick.items():
+            if v != 0:
+                print('k {}, v {}'.format(k,v))
+        sleep(0.1)
+        # print(get_joystick('start'))  # To get a single value
+        sleep(0.1)
 
 
 if __name__ == '__main__':
-    while True:
-        main()
+    main()

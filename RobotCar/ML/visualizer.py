@@ -19,13 +19,17 @@ def run():
 
     # Set up the drawing window
     screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_WIDTH])
+    # Set up the font
+    font = pygame.font.SysFont("Arial", 36)
 
-    file1 = open('./data/out5.txt', 'r')
+    file1 = open('./out123.txt', 'r')
+
     lines = file1.readlines()
     running = True
     counter = 0
     paused = False
     inspect_mode = False
+
     while counter < len(lines):
         line = lines[counter]
         if inspect_mode:
@@ -56,13 +60,16 @@ def run():
 
         distances = get_data_from_arduino(line)
         # print(len(distances))
-        if len(distances) == LIDAR_RESOLUTION:
+        if len(distances) == LIDAR_RESOLUTION + 1:
             # Fill the background with white
             screen.fill((250, 250, 250))
-
+            # Render the text
+            text = font.render("line: {}, turn: {:.2f}".format(counter, float(distances[360])), True, (0, 255, 255))
+            # Blit the text to the screen
+            screen.blit(text, (350, 600))
             for x in range(LIDAR_RESOLUTION):
                 # depend on the average distance, divide distance with a constant for better view
-                a = float(distances[x]) / 2
+                a = float(distances[x]) / 3
                 if x in DECISIVE_FRAME_POSITIONS:
                     # Draw the important point with RED color
                     pygame.draw.circle(screen, (255, 0, 0),

@@ -1,6 +1,7 @@
 from motormodule import Motor
 from joystickmodule import get_joystick
 from record_csv import RecordCSV
+import time
 
 motor = Motor(3, 5, 7, 15, 13, 11)
 metrics = {'turn': 0.0, 'speed': 0.0}
@@ -26,15 +27,17 @@ while True:
 
     if recording:
         recorder.record_line()
-
+        
     if joystick['b'] == 1:
         if recorder is None:
-            recorder = RecordCSV('/dev/ttyUSB0', 'out.txt', metrics=metrics)
+            recorder = RecordCSV(port='/dev/ttyUSB0', metrics=metrics)
             recorder.start()
             recording = True
+        print('Button b pressed')
     elif joystick['a'] == 1:
         recording = False
         recorder.stop_record()
         recorder = None
+        print('Button a pressed')
     elif joystick['x'] == 1:
         break

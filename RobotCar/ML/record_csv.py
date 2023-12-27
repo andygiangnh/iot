@@ -3,6 +3,8 @@
 
 $ ./record_csv.py out.txt"""
 import sys
+import time
+
 from rplidar import RPLidar, _process_scan
 import numpy as np
 
@@ -38,13 +40,15 @@ class RecordCSV:
         """
         return a frame scan of 360 data points
         """
-        print('Recording')
+        print('Recording\n')
         line = ''
         arr = np.empty(LIDAR_RESOLUTION, dtype=object)
         try:
             new_scan = False
             skip = True  # skip the ongoing scanning data point of current frame
             count = 0
+            while self.lidar._serial.inWaiting() > 5:
+                self.lidar._read_response(5)
             while True:
                 if new_scan and count > 1:
                     line = ''
@@ -62,7 +66,7 @@ class RecordCSV:
                 if new_scan:
                     count += 1
                     skip = False
-                    print('new scan {}'.format(i))
+                    # print('new scan {}'.format(i))
                 if count == 1 and not skip:
                     arr[min(round(angle), 359)] = distance
 
@@ -83,8 +87,9 @@ class RecordCSV:
 
 
 if __name__ == '__main__':
-    recorder = RecordCSV(port='COM6')
+    recorder = RecordCSV(port='/dev/ttyUSB0')
     recorder.start()
     for i in range(10):
+        time.sleep(0.1)
         recorder.record_line()
     recorder.stop_record()
