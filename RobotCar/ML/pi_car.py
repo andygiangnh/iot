@@ -2,7 +2,7 @@ from motormodule import Motor
 from joystickmodule import get_joystick
 
 
-motor = Motor(3, 5, 7, 15, 11, 13)
+motor = Motor(3, 5, 7, 15, 13, 11)
 while True:
     joystick = get_joystick()
     speed = joystick['hat1']
@@ -11,8 +11,11 @@ while True:
         speed = joystick['axis1']
     if joystick['axis0'] != 0:
         turn = joystick['axis0']
-    print("speed: {}, turn: {}".format(speed, turn))
-    motor.move(speed, turn)
+    # print("speed: {}, turn: {}".format(speed, turn))
+    if abs(speed) < 0.1:
+        motor.stop()
+    else:
+        motor.move(speed, turn, 0)
 
     if joystick['home'] == 1:
         break

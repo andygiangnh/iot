@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
 from time import sleep
-GPIO.setmode(GPIO.BCM)
+GPIO.setmode(GPIO.BOARD)
 GPIO.setwarnings(False)
 class Motor():
     def __init__(self, EnaA, In1A, In2A, EnaB, In1B, In2B):
