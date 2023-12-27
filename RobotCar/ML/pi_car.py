@@ -11,6 +11,9 @@ while True:
         speed = joystick['axis1']
     if joystick['axis0'] != 0:
         turn = joystick['axis0']
-
+    print("speed: {}, turn: {}".format(speed, turn))
     motor.move(speed, turn)
+
+    if joystick['home'] == 1:
+        break
 
