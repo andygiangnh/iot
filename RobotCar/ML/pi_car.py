@@ -30,6 +30,7 @@ while True:
     if joystick['b'] == 1:
         if recorder is None:
             recorder = RecordCSV('/dev/ttyUSB0', 'out.txt', metrics=metrics)
+            recorder.start()
             recording = True
     elif joystick['a'] == 1:
         recording = False
