@@ -4,7 +4,7 @@ from record_csv import RecordCSV
 
 motor = Motor(3, 5, 7, 15, 13, 11)
 metrics = {'turn': 0.0, 'speed': 0.0}
-recorder = RecordCSV('/dev/ttyUSB0','out.txt', metrics=metrics)
+recorder = None
 recording = False
 
 while True:
@@ -21,16 +21,19 @@ while True:
     else:
         motor.move(speed, turn, 0)
 
-    metrics = {'turn': turn, 'speed': speed}
+    metrics['speed'] = speed
+    metrics['turn'] = turn
 
     if recording:
         recorder.record_line()
 
     if joystick['b'] == 1:
-        recording = True
-        recorder.start()
+        if recorder is None:
+            recorder = RecordCSV('/dev/ttyUSB0', 'out.txt', metrics=metrics)
+            recording = True
     elif joystick['a'] == 1:
         recording = False
         recorder.stop_record()
+        recorder = None
     elif joystick['x'] == 1:
         break

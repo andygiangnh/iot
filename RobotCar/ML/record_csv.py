@@ -23,11 +23,11 @@ class RecordCSV:
         self.path = path
         self.stop_flag = stop_flag
         self.metrics = metrics
-
-    def start(self):
         if self.metrics is None:
             self.metrics = {'turn': 0.0, 'speed': 0.0}
         self.lidar = RPLidar(self.port)
+
+    def start(self):
         self.outfile = open(self.path, 'w')
 
     def record_line(self):
