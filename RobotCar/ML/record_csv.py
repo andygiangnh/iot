@@ -5,7 +5,6 @@ $ ./record_csv.py out.txt"""
 import sys
 from rplidar import RPLidar
 import numpy as np
-from threading import Thread
 
 PORT_NAME = '/dev/ttyUSB0'
 # constant based on lidar resolution
@@ -16,28 +15,31 @@ def nvl(value, default):
     return value if value is not None else default
 
 
-class RecordCSV(Thread):
+class RecordCSV:
     def __init__(self, port=PORT_NAME, path='out.txt', stop_flag=False, metrics=None):
-        Thread.__init__(self)
+        self.outfile = None
+        self.lidar = None
         self.port = port
         self.path = path
         self.stop_flag = stop_flag
         self.metrics = metrics
 
-    def run(self):
-        """Main function"""
+    def start(self):
         if self.metrics is None:
-            self.metrics = {'turn': 0.0, 'speed': 1.0}
-        lidar = RPLidar(self.port)
-        outfile = open(self.path, 'w')
+            self.metrics = {'turn': 0.0, 'speed': 0.0}
+        self.lidar = RPLidar(self.port)
+        self.outfile = open(self.path, 'w')
 
+    def record_line(self):
+        """
+        return a frame scan of 360 data points
+        """
         try:
             print('Recording measurements into csv format... Press Crl+C to stop.')
-            skip = True
-            count = 0
+            skip = True  # skip the ongoing scanning data point of current frame
             line = ''
             arr = np.empty(LIDAR_RESOLUTION, dtype=object)
-            for measurement in lidar.iter_measures():
+            for measurement in self.lidar.iter_measures():
                 if self.stop_flag:
                     break
                 if measurement[0]:
@@ -47,28 +49,31 @@ class RecordCSV(Thread):
                             line += str(nvl(v, 0)) + ','
                         line += "{:.2f}".format(self.metrics['turn']) + '\n'
                         print(line)
-                        outfile.write(line)
+                        self.outfile.write(line)
+                        break
 
                     skip = False
-                    count = 0
                     arr = np.empty(LIDAR_RESOLUTION, dtype=object)
                 elif not skip:
                     arr[min(round(measurement[2]), 359)] = measurement[3]
-                    count += 1
 
         except KeyboardInterrupt:
             print('Stopping.')
         finally:
-            lidar.stop()
-            lidar.disconnect()
-            outfile.close()
-            stop_flag = False
+            self.stop_flag = False
 
     def stop_record(self):
+        """
+        stop recording and write to csv file
+        """
         self.stop_flag = True
+        self.lidar.stop()
+        self.lidar.disconnect()
+        self.outfile.close()
 
 
 if __name__ == '__main__':
     recorder = RecordCSV(port='COM6')
     recorder.start()
-
+    recorder.record_line()
+    recorder.stop_record()
