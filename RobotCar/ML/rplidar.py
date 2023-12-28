@@ -401,7 +401,7 @@ class RPLidar(object):
                     return line[:-1]
                 else:
                     arr = np.empty(360, dtype=object)
-                    arr[min(round(angle), 359)] = ':.2f'.format(distance)
+                    arr[min(round(angle), 359)] = '{:.2f}'.format(distance)
                     breakFlag = True
             elif breakFlag:
                 arr[min(round(angle), 359)] = distance
