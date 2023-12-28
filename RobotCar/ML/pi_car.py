@@ -7,6 +7,7 @@ motor = Motor(3, 5, 7, 15, 13, 11)
 metrics = {'turn': 0.0, 'speed': 0.0}
 recorder = None
 recording = False
+auto = False
 
 while True:
     joystick = get_joystick()
@@ -35,16 +36,22 @@ while True:
         recorder.stop_record()
         recorder = None
         print('Button a pressed')
-    elif joystick['L1'] == 1:
-        measure = recorder.read_line()
-        speed = 1
-        turn = predict_dir(measure)
+    elif joystick['L2'] == 1:
+        print('L2 pressed! RobotCar in self-driving mode!')
+        auto = True
+    elif joystick['R2'] == 1:
+        print('R2 pressed! RobotCar in manual mode!')
+        auto = False
     elif joystick['x'] == 1:
         recording = False
         recorder.stop_record()
         recorder = None
         break
 
+    if auto:
+        measure = recorder.read_line()
+        speed = 0.9
+        turn = predict_dir(measure)
     if abs(speed) < 0.1 and abs(turn) < 0.1:
         motor.stop()
     else:
