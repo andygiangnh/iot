@@ -53,7 +53,7 @@ while True:
 
     if auto:
         measure = recorder.read_line()
-        speed = 0.9
+        speed = -0.9
         turn = predict_dir(measure)
     if abs(speed) < 0.1 and abs(turn) < 0.1:
         motor.stop()

@@ -1,6 +1,9 @@
 import pygame
 from time import sleep
 
+import os
+os.environ["SDL_VIDEODRIVER"] = "dummy"  # fool the system to think it has a video
+
 pygame.init()
 controller = pygame.joystick.Joystick(0)
 controller.init()
