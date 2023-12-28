@@ -6,7 +6,8 @@ LIDAR_RESOLUTION = 360
 # Constant screen width
 SCREEN_WIDTH = 800
 # Selected positions in a frame (result of the Sklearn SelectKBest function)
-DECISIVE_FRAME_POSITIONS = [141, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 203, 204, 205, 206, 207]
+DECISIVE_FRAME_POSITIONS = [24, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 43, 44, 46, 50, 51, 150, 156, 202, 206,
+                            212, 213, 324, 330, 333, 335, 337, 359]
 
 
 def get_data_from_arduino(line):
@@ -22,7 +23,7 @@ def run():
     # Set up the font
     font = pygame.font.SysFont("Arial", 36)
 
-    file1 = open('./out123.txt', 'r')
+    file1 = open('./data/run2/out.txt', 'r')
 
     lines = file1.readlines()
     running = True
@@ -73,19 +74,19 @@ def run():
                 if x in DECISIVE_FRAME_POSITIONS:
                     # Draw the important point with RED color
                     pygame.draw.circle(screen, (255, 0, 0),
-                                       (math.cos(x / 180 * math.pi) * a + SCREEN_WIDTH/2,
-                                        math.sin(x / 180 * math.pi) * a + SCREEN_WIDTH/2),
+                                       (math.cos(x / 180 * math.pi) * a + SCREEN_WIDTH / 2,
+                                        math.sin(x / 180 * math.pi) * a + SCREEN_WIDTH / 2),
                                        3)
                 else:
                     # Draw the ordinary point with BLACK color
                     pygame.draw.circle(screen, (0, 0, 0),
-                                       (math.cos(x / 180 * math.pi) * a + SCREEN_WIDTH/2,
-                                        math.sin(x / 180 * math.pi) * a + SCREEN_WIDTH/2),
+                                       (math.cos(x / 180 * math.pi) * a + SCREEN_WIDTH / 2,
+                                        math.sin(x / 180 * math.pi) * a + SCREEN_WIDTH / 2),
                                        2)
                     # print('Position x:{}, y:{}'
                     #       .format(line_positions[x][0] * a + 400, line_positions[x][1] * a + 400))
 
-            pygame.draw.circle(screen, (252, 132, 3), (SCREEN_WIDTH/2, SCREEN_WIDTH/2), 12)
+            pygame.draw.circle(screen, (252, 132, 3), (SCREEN_WIDTH / 2, SCREEN_WIDTH / 2), 12)
             # Flip the display
             pygame.display.flip()
             pygame.time.wait(50)

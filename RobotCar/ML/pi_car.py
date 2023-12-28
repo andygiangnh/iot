@@ -1,7 +1,7 @@
 from motormodule import Motor
 from joystickmodule import get_joystick
 from record_csv import RecordCSV
-import time
+from mldriver import predict_dir
 
 motor = Motor(3, 5, 7, 15, 13, 11)
 metrics = {'turn': 0.0, 'speed': 0.0}
@@ -17,10 +17,6 @@ while True:
     if joystick['axis0'] != 0:
         turn = joystick['axis0']
     # print("speed: {}, turn: {}".format(speed, turn))
-    if abs(speed) < 0.1 and abs(turn) < 0.1:
-        motor.stop()
-    else:
-        motor.move(speed, turn, 0)
 
     metrics['speed'] = speed
     metrics['turn'] = turn
@@ -39,8 +35,17 @@ while True:
         recorder.stop_record()
         recorder = None
         print('Button a pressed')
+    elif joystick['L1'] == 1:
+        measure = recorder.read_line()
+        speed = 1
+        turn = predict_dir(measure)
     elif joystick['x'] == 1:
         recording = False
         recorder.stop_record()
         recorder = None
         break
+
+    if abs(speed) < 0.1 and abs(turn) < 0.1:
+        motor.stop()
+    else:
+        motor.move(speed, turn, 0)

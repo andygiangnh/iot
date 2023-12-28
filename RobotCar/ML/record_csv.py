@@ -47,6 +47,9 @@ class RecordCSV:
 
         return line
 
+    def read_line(self):
+        return self.lidar.read_single_measure()
+
     def stop_record(self):
         """
         stop recording and write to csv file
