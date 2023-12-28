@@ -5,21 +5,23 @@ from rplidar import RPLidar, _process_scan
 lidar = RPLidar('COM6')
 
 lidar.connect()
+lidar.motor_speed = 300
 lidar.start_motor()
-lidar.start()
+
 
 for i in range(10):
-    time.sleep(1)
     print('counter {}'.format(i))
-    new_scan = False
-    while not new_scan:
-        raw = lidar._read_response(5)
-        new_scan, quality, angle, distance = _process_scan(raw)
-        print('new scan:{}, angle: {}, distance: {} '.format(new_scan, angle, distance))
-        if new_scan:
-            print('new scan {}'.format(i))
+    """
+    method single_measure will start scanning process if it not started
+    """
+    print(lidar.scanning)  # lidar is actively scanning
+    print(lidar.single_measure())
 
-lidar.reset()
+    # increase the time will result in more data in the serial buffer
+    time.sleep(1)
+
+
 lidar.stop()
-lidar.stop_motor()
+print(lidar.scanning)
 lidar.disconnect()
+print('Done')

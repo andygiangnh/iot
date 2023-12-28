@@ -1,4 +1,4 @@
-'''Simple and lightweight module for working with RPLidar rangefinder scanners.
+"""Simple and lightweight module for working with RPLidar rangefinder scanners.
 
 Usage example:
 
@@ -21,7 +21,7 @@ Usage example:
 >>> lidar.disconnect()
 
 For additional information please refer to the RPLidar class documentation.
-'''
+"""
 import logging
 import sys
 import time
@@ -98,8 +98,8 @@ def _process_express_scan(data, new_angle, trame):
     new_scan = (new_angle < data.start_angle) & (trame == 1)
     angle = (data.start_angle + (
             (new_angle - data.start_angle) % 360
-            )/32*trame - data.angle[trame-1]) % 360
-    distance = data.distance[trame-1]
+    ) / 32 * trame - data.angle[trame - 1]) % 360
+    distance = data.distance[trame - 1]
     return new_scan, None, angle, distance
 
 
@@ -164,7 +164,7 @@ class RPLidar(object):
 
     @motor_speed.setter
     def motor_speed(self, pwm):
-        assert(0 <= pwm <= MAX_MOTOR_PWM)
+        assert (0 <= pwm <= MAX_MOTOR_PWM)
         self._motor_speed = pwm
         if self.motor_running:
             self._set_pwm(self._motor_speed)
@@ -194,7 +194,7 @@ class RPLidar(object):
         size = struct.pack('B', len(payload))
         req = SYNC_BYTE + cmd + size + payload
         checksum = 0
-        for v in struct.unpack('B'*len(req), req):
+        for v in struct.unpack('B' * len(req), req):
             checksum ^= v
         req += struct.pack('B', checksum)
         self._serial.write(req)
@@ -223,6 +223,7 @@ class RPLidar(object):
         while self._serial.inWaiting() < dsize:
             time.sleep(0.001)
         data = self._serial.read(dsize)
+        # print('data: {}'.format(data))
         self.logger.debug('Received data: %s', _showhex(data))
         return data
 
@@ -289,16 +290,16 @@ class RPLidar(object):
         return status, error_code
 
     def clean_input(self):
-        '''Clean input buffer by reading all available data'''
+        """Clean input buffer by reading all available data"""
         if self.scanning[0]:
-            return 'Cleanning not allowed during scanning process active !'
+            return 'Cleaning not allowed during scanning process active !'
         self._serial.flushInput()
         self.express_trame = 32
         self.express_data = False
 
     def stop(self):
-        '''Stops scanning process, disables laser diode and the measurement
-        system, moves sensor to the idle state.'''
+        """Stops scanning process, disables laser diode and the measurement
+        system, moves sensor to the idle state."""
         self.logger.info('Stopping scanning')
         self._send_cmd(STOP_BYTE)
         time.sleep(.1)
@@ -306,12 +307,12 @@ class RPLidar(object):
         self.clean_input()
 
     def start(self, scan_type='normal'):
-        '''Start the scanning process
+        """Start the scanning process
 
         Parameters
         ----------
-        scan : normal, force or express.
-        '''
+        scan_type : normal, force or express.
+        """
         if self.scanning[0]:
             return 'Scanning already running !'
         '''Start the scanning process, enable laser diode and the
@@ -348,23 +349,65 @@ class RPLidar(object):
         self.scanning = [True, dsize, scan_type]
 
     def reset(self):
-        '''Resets sensor core, reverting it to a similar state as it has
-        just been powered up.'''
-        self.logger.info('Reseting the sensor')
+        """Resets sensor core, reverting it to a similar state as it has
+        just been powered up."""
+        self.logger.info('Resetting the sensor')
         self._send_cmd(RESET_BYTE)
         time.sleep(2)
         self.clean_input()
 
+    def single_measure(self, scan_type='normal', max_buf_meas=500):
+        """
+        Pre-requisite: start_motor before call this method
+        Auto-start the scanning process if it is not already started
+
+        Returns:
+            Exact one complete scan cycle in csv starting with True new_scan flag
+        """
+        if not self.scanning[0]:
+            self.start(scan_type)
+
+        dsize = self.scanning[1]
+        if max_buf_meas:
+            data_in_buf = self._serial.inWaiting()
+            print(self._serial.inWaiting())
+            if data_in_buf > max_buf_meas:
+                self.logger.warning(
+                    'Too many bytes in the input buffer: %d/%d. '
+                    'Cleaning buffer...',
+                    data_in_buf, max_buf_meas)
+                while self._serial.inWaiting() > dsize:
+                    # data_in_buf = self._serial.inWaiting()
+                    # print('Too many bytes in the input buffer: ', data_in_buf)
+                    self._read_response(dsize)  # Call this as a workaround to clean buffer
+                    # print(self.clean_input())  # This method doesn't work for RPLidar A1M8
+
+        breakFlag = False
+        line = ''
+        while True:
+            raw = self._read_response(dsize)
+            new_scan, quality, angle, distance = _process_scan(raw)
+            # print('new scan:{}, angle: {}, distance: {} '.format(new_scan, angle, distance))
+            if new_scan:
+                if breakFlag:
+                    return line[:-1]
+                else:
+                    line = '{},{:.2f},{:.2f}'.format(new_scan, angle, distance) + ','
+                    breakFlag = True
+            elif breakFlag:
+                line += '{},{:.2f},{:.2f}'.format(new_scan, angle, distance) + ','
+
     def iter_measures(self, scan_type='normal', max_buf_meas=3000):
-        '''Iterate over measures. Note that consumer must be fast enough,
+        """Iterate over measures. Note that consumer must be fast enough,
         otherwise data will be accumulated inside buffer and consumer will get
         data with increasing lag.
 
         Parameters
         ----------
+        scan_type : {'normal', 'express'}
         max_buf_meas : int or False if you want unlimited buffer
             Maximum number of bytes to be stored inside the buffer. Once
-            numbe exceeds this limit buffer will be emptied out.
+            number exceeds this limit buffer will be emptied out.
 
         Yields
         ------
@@ -377,7 +420,7 @@ class RPLidar(object):
         distance : float
             Measured object distance related to the sensor's rotation center.
             In millimeter unit. Set to 0 when measure is invalid.
-        '''
+        """
         self.start_motor()
         if not self.scanning[0]:
             self.start(scan_type)
@@ -402,13 +445,13 @@ class RPLidar(object):
                     if not self.express_data:
                         self.logger.debug('reading first time bytes')
                         self.express_data = ExpressPacket.from_string(
-                                            self._read_response(dsize))
+                            self._read_response(dsize))
 
                     self.express_old_data = self.express_data
                     self.logger.debug('set old_data with start_angle %f',
                                       self.express_old_data.start_angle)
                     self.express_data = ExpressPacket.from_string(
-                                        self._read_response(dsize))
+                        self._read_response(dsize))
                     self.logger.debug('set new_data with start_angle %f',
                                       self.express_data.start_angle)
 
@@ -422,25 +465,26 @@ class RPLidar(object):
                                             self.express_trame)
 
     def iter_scans(self, scan_type='normal', max_buf_meas=3000, min_len=5):
-        '''Iterate over scans. Note that consumer must be fast enough,
+        """Iterate over scans. Note that consumer must be fast enough,
         otherwise data will be accumulated inside buffer and consumer will get
         data with increasing lag.
 
         Parameters
         ----------
+        scan_type : {'normal', 'express'}
         max_buf_meas : int
             Maximum number of measures to be stored inside the buffer. Once
-            numbe exceeds this limit buffer will be emptied out.
+            number exceeds this limit buffer will be emptied out.
         min_len : int
-            Minimum number of measures in the scan for it to be yelded.
+            Minimum number of measures in the scan for it to be yielded.
 
         Yields
         ------
         scan : list
-            List of the measures. Each measurment is tuple with following
+            List of the measures. Each measurement is tuple with following
             format: (quality, angle, distance). For values description please
             refer to `iter_measures` method's documentation.
-        '''
+        """
         scan_list = []
         iterator = self.iter_measures(scan_type, max_buf_meas)
         for new_scan, quality, angle, distance in iterator:
@@ -469,20 +513,21 @@ class ExpressPacket(namedtuple('express_packet',
         for b in packet[2:]:
             checksum ^= b
         if checksum != (packet[0] & 0b00001111) + ((
-                        packet[1] & 0b00001111) << 4):
+                                                           packet[1] & 0b00001111) << 4):
             raise ValueError('Invalid checksum ({})'.format(packet))
 
         new_scan = packet[3] >> 7
         start_angle = (packet[2] + ((packet[3] & 0b01111111) << 8)) / 64
 
         d = a = ()
-        for i in range(0,80,5):
-            d += ((packet[i+4] >> 2) + (packet[i+5] << 6),)
-            a += (((packet[i+8] & 0b00001111) + ((
-                    packet[i+4] & 0b00000001) << 4))/8*cls.sign[(
-                     packet[i+4] & 0b00000010) >> 1],)
-            d += ((packet[i+6] >> 2) + (packet[i+7] << 6),)
-            a += (((packet[i+8] >> 4) + (
-                (packet[i+6] & 0b00000001) << 4))/8*cls.sign[(
-                    packet[i+6] & 0b00000010) >> 1],)
+        for i in range(0, 80, 5):
+            d += ((packet[i + 4] >> 2) + (packet[i + 5] << 6),)
+            a += (((packet[i + 8] & 0b00001111) + ((
+                                                           packet[i + 4] & 0b00000001) << 4)) / 8 * cls.sign[(
+                                                                                                                     packet[
+                                                                                                                         i + 4] & 0b00000010) >> 1],)
+            d += ((packet[i + 6] >> 2) + (packet[i + 7] << 6),)
+            a += (((packet[i + 8] >> 4) + (
+                    (packet[i + 6] & 0b00000001) << 4)) / 8 * cls.sign[(
+                                                                               packet[i + 6] & 0b00000010) >> 1],)
         return cls(d, a, new_scan, start_angle)
