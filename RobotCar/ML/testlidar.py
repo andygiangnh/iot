@@ -15,10 +15,10 @@ for i in range(10):
     method single_measure will start scanning process if it not started
     """
     print(lidar.scanning)  # lidar is actively scanning
-    print(lidar.single_measure())
+    print(lidar.read_single_measure())
 
     # increase the time will result in more data in the serial buffer
-    time.sleep(1)
+    time.sleep(0.05)
 
 
 lidar.stop()

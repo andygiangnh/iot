@@ -41,39 +41,10 @@ class RecordCSV:
         return a frame scan of 360 data points
         """
         print('Recording\n')
-        line = ''
-        arr = np.empty(LIDAR_RESOLUTION, dtype=object)
-        try:
-            new_scan = False
-            skip = True  # skip the ongoing scanning data point of current frame
-            count = 0
-            while self.lidar._serial.inWaiting() > 5:
-                self.lidar._read_response(5)
-            while True:
-                if new_scan and count > 1:
-                    line = ''
-                    if not skip:
-                        for v in arr:
-                            line += str(nvl(v, 0)) + ','
-                        line += "{:.2f}".format(self.metrics['turn']) + '\n'
-                        # print(line)
-                        self.outfile.write(line)
-                    break
-                #  Read value from serial
-                raw = self.lidar._read_response(5)
-                new_scan, quality, angle, distance = _process_scan(raw)
-                # print('new scan:{}, angle: {}, distance: {} '.format(new_scan, angle, distance))
-                if new_scan:
-                    count += 1
-                    skip = False
-                    # print('new scan {}'.format(i))
-                if count == 1 and not skip:
-                    arr[min(round(angle), 359)] = distance
+        line = self.lidar.read_single_measure()
+        line += ",{:.2f}".format(self.metrics['turn']) + '\n'
+        self.outfile.write(line)
 
-        except KeyboardInterrupt:
-            print('Stopping.')
-        finally:
-            self.stop_flag = False
         return line
 
     def stop_record(self):
@@ -87,9 +58,9 @@ class RecordCSV:
 
 
 if __name__ == '__main__':
-    recorder = RecordCSV(port='/dev/ttyUSB0')
+    recorder = RecordCSV(port='COM6')
     recorder.start()
     for i in range(10):
         time.sleep(0.1)
-        recorder.record_line()
+        print(recorder.record_line())
     recorder.stop_record()

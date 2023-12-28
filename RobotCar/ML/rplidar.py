@@ -28,6 +28,7 @@ import time
 import codecs
 import serial
 import struct
+import numpy as np
 
 from collections import namedtuple
 
@@ -77,6 +78,10 @@ def _b2i(byte):
 def _showhex(signal):
     """Converts string bytes to hex representation (useful for debugging)"""
     return [format(_b2i(b), '#02x') for b in signal]
+
+
+def nvl(value, default):
+    return value if value is not None else default
 
 
 def _process_scan(raw):
@@ -356,13 +361,14 @@ class RPLidar(object):
         time.sleep(2)
         self.clean_input()
 
-    def single_measure(self, scan_type='normal', max_buf_meas=500):
+    def read_single_measure(self, scan_type='normal', max_buf_meas=500):
         """
         Pre-requisite: start_motor before call this method
         Auto-start the scanning process if it is not already started
 
         Returns:
             Exact one complete scan cycle in csv starting with True new_scan flag
+            Arranged into 360 degree data points
         """
         if not self.scanning[0]:
             self.start(scan_type)
@@ -370,7 +376,6 @@ class RPLidar(object):
         dsize = self.scanning[1]
         if max_buf_meas:
             data_in_buf = self._serial.inWaiting()
-            print(self._serial.inWaiting())
             if data_in_buf > max_buf_meas:
                 self.logger.warning(
                     'Too many bytes in the input buffer: %d/%d. '
@@ -384,18 +389,22 @@ class RPLidar(object):
 
         breakFlag = False
         line = ''
+        arr = np.empty(360, dtype=object)
         while True:
             raw = self._read_response(dsize)
             new_scan, quality, angle, distance = _process_scan(raw)
             # print('new scan:{}, angle: {}, distance: {} '.format(new_scan, angle, distance))
             if new_scan:
                 if breakFlag:
+                    for v in arr:
+                        line += str(nvl(v, 0)) + ','
                     return line[:-1]
                 else:
-                    line = '{},{:.2f},{:.2f}'.format(new_scan, angle, distance) + ','
+                    arr = np.empty(360, dtype=object)
+                    arr[min(round(angle), 359)] = ':.2f'.format(distance)
                     breakFlag = True
             elif breakFlag:
-                line += '{},{:.2f},{:.2f}'.format(new_scan, angle, distance) + ','
+                arr[min(round(angle), 359)] = distance
 
     def iter_measures(self, scan_type='normal', max_buf_meas=3000):
         """Iterate over measures. Note that consumer must be fast enough,
