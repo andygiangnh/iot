@@ -27,7 +27,7 @@ while True:
 
     if recording:
         recorder.record_line()
-        
+
     if joystick['b'] == 1:
         if recorder is None:
             recorder = RecordCSV(port='/dev/ttyUSB0', metrics=metrics)
@@ -40,4 +40,7 @@ while True:
         recorder = None
         print('Button a pressed')
     elif joystick['x'] == 1:
+        recording = False
+        recorder.stop_record()
+        recorder = None
         break
