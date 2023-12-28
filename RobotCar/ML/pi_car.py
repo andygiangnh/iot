@@ -38,6 +38,9 @@ while True:
         print('Button a pressed')
     elif joystick['L2'] == 1:
         print('L2 pressed! RobotCar in self-driving mode!')
+        if recorder is None:
+            recorder = RecordCSV(port='/dev/ttyUSB0', metrics=metrics)
+            recorder.start()
         auto = True
     elif joystick['R2'] == 1:
         print('R2 pressed! RobotCar in manual mode!')
