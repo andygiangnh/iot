@@ -1,5 +1,6 @@
 import pygame
 import math
+from pginput import InputBox
 
 # constant based on lidar resolution
 LIDAR_RESOLUTION = 360
@@ -17,11 +18,16 @@ def get_data_from_arduino(line):
 
 def run():
     pygame.init()
-
+    clock = pygame.time.Clock()
     # Set up the drawing window
     screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_WIDTH])
     # Set up the font
-    font = pygame.font.SysFont("Arial", 36)
+    font = pygame.font.Font(None, 32)
+    # FONT = pygame.font.Font(None, 32)
+
+    input_box1 = InputBox(350, 650, 140, 32, font)
+    input_box2 = InputBox(350, 700, 140, 32, font)
+    input_boxes = [input_box1, input_box2]
 
     file1 = open('./data/run2/out.txt', 'r')
 
@@ -40,34 +46,35 @@ def run():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     paused = not paused
-                    print('PAUSE STATUS: {}'.format(paused))
+                    # print('PAUSE STATUS: {}'.format(paused))
                 elif event.key == pygame.K_i:
                     """
                     Press 'i' keyboard will turn on inspection mode,
                     which run frame by frame
                     """
                     inspect_mode = not inspect_mode
-                    print('INSPECT MODE: {}'.format(inspect_mode))
+                    # print('INSPECT MODE: {}'.format(inspect_mode))
                 elif event.key == pygame.K_q:
                     running = False
             elif event.type == pygame.QUIT:
                 # Press 'X' button on window will close the program
                 running = False
 
+            # handle input box event
+            for box in input_boxes:
+                box.handle_event(event)
+
         if not running:
             break
-        elif paused:
-            continue
+        # elif paused:
+        #     continue
 
         distances = get_data_from_arduino(line)
         # print(len(distances))
         if len(distances) == LIDAR_RESOLUTION + 1:
             # Fill the background with white
             screen.fill((250, 250, 250))
-            # Render the text
-            text = font.render("line: {}, turn: {:.2f}".format(counter, float(distances[360])), True, (0, 255, 255))
-            # Blit the text to the screen
-            screen.blit(text, (350, 600))
+
             for x in range(LIDAR_RESOLUTION):
                 # depend on the average distance, divide distance with a constant for better view
                 a = float(distances[x]) / 3
@@ -86,11 +93,33 @@ def run():
                     # print('Position x:{}, y:{}'
                     #       .format(line_positions[x][0] * a + 400, line_positions[x][1] * a + 400))
 
-            pygame.draw.circle(screen, (252, 132, 3), (SCREEN_WIDTH / 2, SCREEN_WIDTH / 2), 12)
+            # draw input boxes on screen
+            if not input_box1.active:
+                input_box1.set_text(distances[360])
+            for box in input_boxes:
+                box.update()
+            for box in input_boxes:
+                box.draw(screen)
+
+            # Render the text
+            text = font.render("line: {}, turn: {:.2f}".format(counter, float(distances[360])), True, (0, 255, 255))
+            # Blit the text to the screen
+            screen.blit(text, (350, 600))
+
+            # draw the car
+            pygame.draw.circle(screen, (252, 132, 3), (SCREEN_WIDTH/2, SCREEN_WIDTH/2), 12)
+            pygame.draw.line(screen, (0, 0, 255), (SCREEN_WIDTH/2, SCREEN_WIDTH/2),
+                             (SCREEN_WIDTH/2 + 40, SCREEN_WIDTH/2), 3)
+            x = math.cos(float(distances[360]) * math.pi / 4) * 40
+            y = math.sin(float(distances[360]) * math.pi / 4) * 40
+            pygame.draw.line(screen, (0, 255, 0), (SCREEN_WIDTH / 2, SCREEN_WIDTH / 2),
+                             (SCREEN_WIDTH/2 + x, SCREEN_WIDTH/2 + y), 3)
             # Flip the display
             pygame.display.flip()
-            pygame.time.wait(50)
-            counter += 1
+            clock.tick(10)
+
+            if not paused:
+                counter += 1
 
     pygame.quit()
 
