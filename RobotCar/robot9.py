@@ -7,6 +7,7 @@ import pygame
 import os
 
 os.environ["SDL_VIDEODRIVER"] = "dummy"  # fool the system to think it has a video
+epsilon = 0.1
 
 pygame.joystick.init()
 pygame.init()
@@ -57,6 +58,7 @@ speedright.start(0)
 axis1 = 0
 axis2 = 0
 reverseSpeedRatio = 1
+turn_rate = math.pi * 1.4
 
 while True:
     for event in pygame.event.get():
@@ -88,14 +90,17 @@ while True:
                 axis2 = event.value
 
             print("axis1: {}, axis2: {}".format(axis1, axis2))
-
-            if axis2 > 0:
-                if axis1 < 0:
-                    outRight = int(max(abs(axis1), axis2) * 100)
-                    outLeft = int(math.atan(abs(axis1) / axis2) / math.pi * outRight)
-                elif axis1 > 0:
-                    outLeft = int(max(axis1, axis2) * 100)
-                    outRight = int(math.atan(axis1 / axis2) / math.pi * outLeft)
+            a = int(max(abs(axis1), abs(axis2)) * 100)
+            b = 1
+            if abs(axis2) >= epsilon:
+                b = int(math.atan(abs(axis1) / abs(axis2)) / turn_rate * a)
+            if axis2 > epsilon:
+                if axis1 < 0 - epsilon:
+                    outRight = a
+                    outLeft = b
+                elif axis1 > epsilon:
+                    outLeft = a
+                    outRight = b
                 else:
                     outLeft = int(axis2 * 100)
                     outRight = outLeft
@@ -105,13 +110,13 @@ while True:
                 speedleft.ChangeDutyCycle(int(outLeft * reverseSpeedRatio))
                 speedright.ChangeDutyCycle(int(outRight * reverseSpeedRatio))
                 carMove("DOWN")
-            elif axis2 < 0:
-                if axis1 < 0:
-                    outRight = int(max(abs(axis1), abs(axis2)) * 100)
-                    outLeft = int(math.atan(abs(axis1) / abs(axis2)) / math.pi * outRight)
-                elif axis1 > 0:
-                    outLeft = int(max(axis1, abs(axis2)) * 100)
-                    outRight = int(math.atan(axis1 / abs(axis2)) / math.pi * outLeft)
+            elif axis2 < 0 - epsilon:
+                if axis1 < 0 - epsilon:
+                    outRight = a
+                    outLeft = b
+                elif axis1 > epsilon:
+                    outLeft = a
+                    outRight = b
                 else:
                     outLeft = int(abs(axis2) * 100)
                     outRight = outLeft
@@ -121,15 +126,15 @@ while True:
                 speedleft.ChangeDutyCycle(outLeft)
                 speedright.ChangeDutyCycle(outRight)
                 carMove("UP")
-            elif axis2 == 0:
+            elif abs(axis2) <= epsilon:
                 outRight = int(abs(axis1) * 100)
                 outLeft = outRight
                 speedleft.ChangeDutyCycle(outLeft)
                 speedright.ChangeDutyCycle(outRight)
 
-                if axis1 > 0:
-                    carMove("RIGHT")
-                elif axis1 < 0:
+                if axis1 > epsilon:
                     carMove("LEFT")
+                elif axis1 < 0 - epsilon:
+                    carMove("RIGHT")
                 else:
                     carMove("STOP")
