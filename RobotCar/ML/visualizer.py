@@ -11,7 +11,7 @@ DECISIVE_FRAME_POSITIONS = [24, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 
                             212, 213, 324, 330, 333, 335, 337, 359]
 
 
-def get_data_from_arduino(line):
+def parse_lidar_data(line):
     d_list = line.split(",")
     return d_list
 
@@ -66,17 +66,15 @@ def run():
 
         if not running:
             break
-        # elif paused:
-        #     continue
 
-        distances = get_data_from_arduino(line)
-        # print(len(distances))
-        if len(distances) == LIDAR_RESOLUTION + 1:
+        distances = parse_lidar_data(line)
+        if len(distances) == LIDAR_RESOLUTION + 1:  # One more column, the last column contain TURN value
             # Fill the background with white
             screen.fill((250, 250, 250))
 
             for x in range(LIDAR_RESOLUTION):
                 # depend on the average distance, divide distance with a constant for better view
+                # provide zoom in/out effect
                 a = float(distances[x]) / 3
                 if x in DECISIVE_FRAME_POSITIONS:
                     # Draw the important point with RED color
@@ -110,6 +108,7 @@ def run():
             pygame.draw.circle(screen, (252, 132, 3), (SCREEN_WIDTH/2, SCREEN_WIDTH/2), 12)
             pygame.draw.line(screen, (0, 0, 255), (SCREEN_WIDTH/2, SCREEN_WIDTH/2),
                              (SCREEN_WIDTH/2 + 40, SCREEN_WIDTH/2), 3)
+            # Use convention: Full LEFT/RIGHT TURN = 45 degree (Pi/4)
             x = math.cos(float(distances[360]) * math.pi / 4) * 40
             y = math.sin(float(distances[360]) * math.pi / 4) * 40
             pygame.draw.line(screen, (0, 255, 0), (SCREEN_WIDTH / 2, SCREEN_WIDTH / 2),
@@ -118,7 +117,7 @@ def run():
             pygame.display.flip()
             clock.tick(10)
 
-            if not paused:
+            if not paused:  # Moving to the next lidar scan cycle
                 counter += 1
 
     pygame.quit()

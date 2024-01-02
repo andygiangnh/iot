@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 """Records measurements to a given file in csv format. Usage example:
 
-$ ./record_csv.py out.txt"""
-import sys
+$ ./lidar_control.py out.txt"""
 import time
 
-from rplidar import RPLidar, _process_scan
-import numpy as np
+from rplidar import RPLidar
 
 PORT_NAME = '/dev/ttyUSB0'
 # constant based on lidar resolution
@@ -17,7 +15,7 @@ def nvl(value, default):
     return value if value is not None else default
 
 
-class RecordCSV:
+class LidarControl:
     def __init__(self, port=PORT_NAME, path='out.txt', stop_flag=False, metrics=None):
         self.outfile = None
         self.lidar = None
@@ -54,14 +52,17 @@ class RecordCSV:
         """
         stop recording and write to csv file
         """
+        self.stop()
+        self.outfile.close()
+
+    def stop(self):
         self.stop_flag = True
         self.lidar.stop()
         self.lidar.disconnect()
-        self.outfile.close()
 
 
 if __name__ == '__main__':
-    recorder = RecordCSV(port='COM6')
+    recorder = LidarControl(port='COM6')
     recorder.start()
     for i in range(10):
         time.sleep(0.1)
