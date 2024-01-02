@@ -29,14 +29,10 @@ class Motor:
         turn *= 100
         leftSpeed = speed - turn
         rightSpeed = speed + turn
-        if leftSpeed > 100:
-            leftSpeed = 100
-        elif leftSpeed < -100:
-            leftSpeed = -100
-        if rightSpeed > 100:
-            rightSpeed = 100
-        elif rightSpeed < -100:
-            rightSpeed = -100
+
+        # Limit speed between -100 and 100
+        leftSpeed = max(-100, min(100, int(leftSpeed)))
+        rightSpeed = max(-100, min(100, int(rightSpeed)))
 
         self.pwmA.ChangeDutyCycle(abs(leftSpeed))
         self.pwmB.ChangeDutyCycle(abs(rightSpeed))

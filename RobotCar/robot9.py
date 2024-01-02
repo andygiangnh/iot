@@ -85,10 +85,10 @@ while(True):
             if axis2 > 0:
                 if axis1 < 0:
                     outRight = int(max(abs(axis1), axis2) * 100)
-                    outLeft = int(math.atan(abs(axis1)/axis2) / (math.pi) * outRight)
+                    outLeft = int(math.atan(abs(axis1)/axis2) / math.pi * outRight)
                 elif axis1 > 0:
                     outLeft = int(max(axis1, axis2) * 100)
-                    outRight = int(math.atan(axis1/axis2) / (math.pi) * outLeft)
+                    outRight = int(math.atan(axis1/axis2) / math.pi * outLeft)
                 else:
                     outLeft = int(axis2 * 100)
                     outRight = outLeft

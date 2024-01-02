@@ -35,8 +35,9 @@ while True:
         lidarControl = None
     elif joystick['x'] == 1:
         recording = False
-        lidarControl.stop_record()
-        lidarControl = None
+        if lidarControl is not None:
+            lidarControl.stop_record()
+            lidarControl = None
         break
 
     speed = 0 - joystick['hat1']  # Reverse the sign, depend on the joystick specs
