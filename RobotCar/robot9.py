@@ -15,10 +15,10 @@ controller.init()
 print("Pygame count:{}".format(pygame.joystick.get_count()))
 
 def motorOut(in1, in2, in3, in4):
-    GPIO.output(7, in1)
-    GPIO.output(11, in2)
+    GPIO.output(5, in1)
+    GPIO.output(7, in2)
     GPIO.output(13, in3)
-    GPIO.output(15, in4)
+    GPIO.output(11, in4)
 
 def carMove(direction):
     if direction == "UP":
@@ -37,15 +37,15 @@ def carMove(direction):
 # power source 1: 5v for Raspberry Pi Zero board
 # power source 2: 12v for motors, flashlight, sound
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(7,GPIO.OUT)  # Motor Left
-GPIO.setup(11,GPIO.OUT) # Motor Left
-GPIO.setup(13,GPIO.OUT) # Motor Right
-GPIO.setup(15,GPIO.OUT) # Motor Right
-GPIO.setup(33,GPIO.OUT) # Motor speed left
-GPIO.setup(35,GPIO.OUT) # Motor speed right
+GPIO.setup(5, GPIO.OUT)  # Motor Left
+GPIO.setup(7, GPIO.OUT)  # Motor Left
+GPIO.setup(11, GPIO.OUT)  # Motor Right
+GPIO.setup(13, GPIO.OUT)  # Motor Right
+GPIO.setup(3, GPIO.OUT)  # Motor speed left
+GPIO.setup(15, GPIO.OUT)  # Motor speed right
 
-speedleft  = GPIO.PWM(33, 100)
-speedright = GPIO.PWM(35, 100)
+speedleft  = GPIO.PWM(3, 100)
+speedright = GPIO.PWM(15, 100)
 speedleft.start(10)
 speedright.start(10)
 
@@ -54,7 +54,7 @@ axis1 = 0
 axis2 = 0
 reverseSpeedRatio = 0.5
 
-while(True):
+while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             break
