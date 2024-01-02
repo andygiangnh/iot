@@ -4,6 +4,9 @@ import time
 import math
 import pygame
 
+import os
+os.environ["SDL_VIDEODRIVER"] = "dummy"  # fool the system to think it has a video
+
 pygame.joystick.init()
 pygame.init()
 controller = pygame.joystick.Joystick(0)
