@@ -1,6 +1,6 @@
 import pygame
 import math
-from pginput import InputBox
+from pginput import InputBox, DataManager
 
 # constant based on lidar resolution
 LIDAR_RESOLUTION = 360
@@ -11,12 +11,8 @@ DECISIVE_FRAME_POSITIONS = [24, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 
                             212, 213, 324, 330, 333, 335, 337, 359]
 
 
-def parse_lidar_data(line):
-    d_list = line.split(",")
-    return d_list
-
-
 def run():
+    data_manager = DataManager('./data/run2/out.txt', './data/run2/_out.txt')
     pygame.init()
     clock = pygame.time.Clock()
     # Set up the drawing window
@@ -28,17 +24,14 @@ def run():
     input_box1 = InputBox(350, 650, 140, 32, font)
     input_box2 = InputBox(350, 700, 140, 32, font)
     input_boxes = [input_box1, input_box2]
+    input_box1.add_observer(data_manager)
 
-    file1 = open('./data/run2/out.txt', 'r')
-
-    lines = file1.readlines()
     running = True
-    counter = 0
     paused = False
     inspect_mode = False
+    distances = []
 
-    while counter < len(lines):
-        line = lines[counter]
+    while data_manager.has_next():
         if inspect_mode:
             paused = True
         # Did the user click the window close button?
@@ -66,8 +59,8 @@ def run():
 
         if not running:
             break
-
-        distances = parse_lidar_data(line)
+        if data_manager.read_pos < data_manager.pointer:
+            distances = data_manager.dataframe
         if len(distances) == LIDAR_RESOLUTION + 1:  # One more column, the last column contain TURN value
             # Fill the background with white
             screen.fill((250, 250, 250))
@@ -88,8 +81,6 @@ def run():
                                        (math.cos(x / 180 * math.pi) * a + SCREEN_WIDTH / 2,
                                         math.sin(x / 180 * math.pi) * a + SCREEN_WIDTH / 2),
                                        2)
-                    # print('Position x:{}, y:{}'
-                    #       .format(line_positions[x][0] * a + 400, line_positions[x][1] * a + 400))
 
             # draw input boxes on screen
             if not input_box1.active:
@@ -100,7 +91,7 @@ def run():
                 box.draw(screen)
 
             # Render the text
-            text = font.render("line: {}, turn: {:.2f}".format(counter, float(distances[360])), True, (0, 255, 255))
+            text = font.render("line: {}, turn: {:.2f}".format(data_manager.read_pos, float(distances[360])), True, (0, 255, 255))
             # Blit the text to the screen
             screen.blit(text, (350, 600))
 
@@ -118,7 +109,13 @@ def run():
             clock.tick(10)
 
             if not paused:  # Moving to the next lidar scan cycle
-                counter += 1
+                print('Not Paused')
+                # write current line to file
+                data_manager.write_line()
+                # move to the next lidar data frame
+                data_manager.next()
+                # reset input value
+                input_box1.value = ''
 
     pygame.quit()
 

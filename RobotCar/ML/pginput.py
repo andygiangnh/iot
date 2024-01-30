@@ -1,18 +1,46 @@
 import pygame as pg
+import csv
 
 COLOR_INACTIVE = pg.Color('red')
 COLOR_ACTIVE = pg.Color('green')
 
+class Observable:
+    def __init__(self):
+        self.observers = []
 
-class InputBox:
+    def add_observer(self, observer):
+        self.observers.append(observer)
+
+    def remove_observer(self, observer):
+        self.observers.remove(observer)
+
+    def notify_observers(self):
+        for observer in self.observers:
+            observer.update(self)
+
+class Observer:
+    def update(self):
+        pass
+
+class InputBox(Observable):
 
     def __init__(self, x, y, w, h, font, text=''):
+        super().__init__()
         self.rect = pg.Rect(x, y, w, h)
         self.color = COLOR_INACTIVE
         self.text = text
         self.font = font
         self.txt_surface = self.font.render(text, True, self.color)
         self.active = False
+        self._value = ''
+    
+    @property
+    def value(self):
+        return self._value
+    
+    @value.setter
+    def value(self, value):
+        self._value = value
 
     def handle_event(self, event):
         if event.type == pg.MOUSEBUTTONDOWN:
@@ -27,7 +55,8 @@ class InputBox:
         if event.type == pg.KEYDOWN:
             if self.active:
                 if event.key == pg.K_RETURN:
-                    print(self.text)
+                    self._value = self.text
+                    self.notify_observers()
                     self.text = ''
                 elif event.key == pg.K_BACKSPACE:
                     self.text = self.text[:-1]
@@ -51,6 +80,49 @@ class InputBox:
         # Blit the rect.
         pg.draw.rect(screen, self.color, self.rect, 2)
 
+class DataManager(Observer):
+    def __init__(self, in_file, out_file):
+        super().__init__()
+        self.infile = open(in_file, 'r')
+        self.lines = self.infile.readlines()
+        self._pointer = 0
+        self._read_pos = -1
+        self.outfile = open(out_file, 'w', newline='')
+        self.writer = csv.writer(self.outfile)
+        # current line
+        self._line = ''
+        # current dataframe
+        self._lidar_dataframe = []
+
+    @property
+    def dataframe(self):
+        if self._read_pos < self._pointer:
+            self._line = self.lines[self._pointer].rstrip()
+            self._lidar_dataframe = self._line.split(',')
+            self._read_pos = self._pointer
+        return self._lidar_dataframe
+    
+    @property
+    def pointer(self):
+        return self._pointer
+    
+    @property
+    def read_pos(self):
+        return self._read_pos
+
+    def has_next(self):
+        return self._pointer < len(self.lines)
+
+    def next(self):
+        self._pointer += 1
+        return self._lidar_dataframe
+
+    def write_line(self):
+        self.writer.writerow(self._lidar_dataframe)
+
+    def update(self, observable):
+        if isinstance(observable, InputBox):
+            self._lidar_dataframe[360] = observable.value
 
 def main():
     font = pg.font.Font(None, 32)
