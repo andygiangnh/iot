@@ -4,3 +4,5 @@ jetbot/notebooks/road_following/dataset_xy/
 jetbot/notebooks/teleoperation/.ipynb_checkpoints/
 RobotCar/.idea/
 RobotCar/ML/__pycache__/
+RobotCar/ML/.idea/
+RobotCar/ML/notebooks/.ipynb_checkpoints/

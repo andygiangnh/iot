@@ -1,8 +1,10 @@
+import numpy as np
 import pygame as pg
 import csv
 
 COLOR_INACTIVE = pg.Color('red')
 COLOR_ACTIVE = pg.Color('green')
+
 
 class Observable:
     def __init__(self):
@@ -18,9 +20,11 @@ class Observable:
         for observer in self.observers:
             observer.update(self)
 
+
 class Observer:
-    def update(self):
+    def update(self, observable):
         pass
+
 
 class InputBox(Observable):
 
@@ -33,11 +37,11 @@ class InputBox(Observable):
         self.txt_surface = self.font.render(text, True, self.color)
         self.active = False
         self._value = ''
-    
+
     @property
     def value(self):
         return self._value
-    
+
     @value.setter
     def value(self, value):
         self._value = value
@@ -80,8 +84,9 @@ class InputBox(Observable):
         # Blit the rect.
         pg.draw.rect(screen, self.color, self.rect, 2)
 
+
 class DataManager(Observer):
-    def __init__(self, in_file, out_file):
+    def __init__(self, in_file, out_file, w_mode=True):
         super().__init__()
         self.infile = open(in_file, 'r')
         self.lines = self.infile.readlines()
@@ -89,6 +94,7 @@ class DataManager(Observer):
         self._read_pos = -1
         self.outfile = open(out_file, 'w', newline='')
         self.writer = csv.writer(self.outfile)
+        self.w_mode = w_mode
         # current line
         self._line = ''
         # current dataframe
@@ -101,11 +107,11 @@ class DataManager(Observer):
             self._lidar_dataframe = self._line.split(',')
             self._read_pos = self._pointer
         return self._lidar_dataframe
-    
+
     @property
     def pointer(self):
         return self._pointer
-    
+
     @property
     def read_pos(self):
         return self._read_pos
@@ -118,11 +124,13 @@ class DataManager(Observer):
         return self._lidar_dataframe
 
     def write_line(self):
-        self.writer.writerow(self._lidar_dataframe)
+        if self.w_mode:
+            self.writer.writerow(self._lidar_dataframe)
 
     def update(self, observable):
         if isinstance(observable, InputBox):
             self._lidar_dataframe[360] = observable.value
+
 
 def main():
     font = pg.font.Font(None, 32)
@@ -151,7 +159,24 @@ def main():
         clock.tick(30)
 
 
+def get_augmented_data():
+    data_manager = DataManager('./data/run2/out.txt', './data/run2/__out.txt')
+    augmented_data = []
+    while data_manager.has_next():
+        data = data_manager.dataframe
+        augmented_data = np.zeros_like(data)
+        for i in range(360):
+            augmented_data[359 - i] = data[i]
+        augmented_data[360] = 0 - float(data[360])
+
+        data_manager.writer.writerow(augmented_data)
+
+        data_manager.next()
+    return augmented_data
+
+
 if __name__ == '__main__':
-    pg.init()
-    main()
-    pg.quit()
+    # pg.init()
+    # main()
+    # pg.quit()
+    get_augmented_data()

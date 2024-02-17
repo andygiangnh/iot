@@ -7,12 +7,12 @@ LIDAR_RESOLUTION = 360
 # Constant screen width
 SCREEN_WIDTH = 800
 # Selected positions in a frame (result of the Sklearn SelectKBest function)
-DECISIVE_FRAME_POSITIONS = [24, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 43, 44, 46, 50, 51, 150, 156, 202, 206,
-                            212, 213, 324, 330, 333, 335, 337, 359]
+DECISIVE_FRAME_POSITIONS = [3, 6, 8, 10, 13, 18, 25, 28, 239, 248, 252, 290, 294, 295, 296, 297, 298, 302,
+                            304, 308, 309, 311, 312, 314, 315, 318, 319, 321, 324, 359]
 
 
 def run():
-    data_manager = DataManager('./data/run2/out.txt', './data/run2/_out.txt')
+    data_manager = DataManager('./data/run2/__out.txt', 'data/run2/_out.txt', False)
     pygame.init()
     clock = pygame.time.Clock()
     # Set up the drawing window
@@ -28,7 +28,7 @@ def run():
 
     running = True
     paused = False
-    inspect_mode = False
+    inspect_mode = True
     distances = []
 
     while data_manager.has_next():
@@ -68,8 +68,13 @@ def run():
             for x in range(LIDAR_RESOLUTION):
                 # depend on the average distance, divide distance with a constant for better view
                 # provide zoom in/out effect
-                a = float(distances[x]) / 3
+                a = float(distances[x]) / 3.5
                 if x in DECISIVE_FRAME_POSITIONS:
+                    # draw line to the point
+                    pygame.draw.line(screen, (255, 0, 255), (SCREEN_WIDTH / 2, SCREEN_WIDTH / 2),
+                                     (math.cos(x / 180 * math.pi) * a + SCREEN_WIDTH / 2,
+                                      math.sin(x / 180 * math.pi) * a + SCREEN_WIDTH / 2), 2)
+
                     # Draw the important point with RED color
                     pygame.draw.circle(screen, (255, 0, 0),
                                        (math.cos(x / 180 * math.pi) * a + SCREEN_WIDTH / 2,
@@ -82,6 +87,12 @@ def run():
                                         math.sin(x / 180 * math.pi) * a + SCREEN_WIDTH / 2),
                                        2)
 
+                # Draw the opposite (augmented value)
+                # pygame.draw.circle(screen, (255, 100, 100),
+                #                    (math.cos(x / 180 * math.pi) * a + SCREEN_WIDTH / 2,
+                #                     -math.sin(x / 180 * math.pi) * a + SCREEN_WIDTH / 2),
+                #                    2)
+
             # draw input boxes on screen
             if not input_box1.active:
                 input_box1.set_text(distances[360])
@@ -91,19 +102,20 @@ def run():
                 box.draw(screen)
 
             # Render the text
-            text = font.render("line: {}, turn: {:.2f}".format(data_manager.read_pos, float(distances[360])), True, (0, 255, 255))
+            text = font.render("line: {}, turn: {:.2f}".format(
+                data_manager.read_pos, float(distances[360])), True, (0, 255, 255))
             # Blit the text to the screen
             screen.blit(text, (350, 600))
 
             # draw the car
-            pygame.draw.circle(screen, (252, 132, 3), (SCREEN_WIDTH/2, SCREEN_WIDTH/2), 12)
-            pygame.draw.line(screen, (0, 0, 255), (SCREEN_WIDTH/2, SCREEN_WIDTH/2),
-                             (SCREEN_WIDTH/2 + 40, SCREEN_WIDTH/2), 3)
+            pygame.draw.circle(screen, (252, 132, 3), (SCREEN_WIDTH / 2, SCREEN_WIDTH / 2), 12)
+            pygame.draw.line(screen, (0, 0, 255), (SCREEN_WIDTH / 2, SCREEN_WIDTH / 2),
+                             (SCREEN_WIDTH / 2 + 40, SCREEN_WIDTH / 2), 3)
             # Use convention: Full LEFT/RIGHT TURN = 45 degree (Pi/4)
             x = math.cos(float(distances[360]) * math.pi / 4) * 40
             y = math.sin(float(distances[360]) * math.pi / 4) * 40
             pygame.draw.line(screen, (0, 255, 0), (SCREEN_WIDTH / 2, SCREEN_WIDTH / 2),
-                             (SCREEN_WIDTH/2 + x, SCREEN_WIDTH/2 + y), 3)
+                             (SCREEN_WIDTH / 2 + x, SCREEN_WIDTH / 2 + y), 3)
             # Flip the display
             pygame.display.flip()
             clock.tick(10)
