@@ -160,7 +160,7 @@ def main():
 
 
 def get_augmented_data():
-    data_manager = DataManager('./data/run2/out.txt', './data/run2/__out.txt')
+    data_manager = DataManager('./data/run2/out.txt', './data/run2/augmented_out.txt')
     augmented_data = []
     while data_manager.has_next():
         data = data_manager.dataframe

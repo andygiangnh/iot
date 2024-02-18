@@ -8,6 +8,7 @@ GPIO.setwarnings(False)
 epsilon = 0.1
 turn_rate = math.pi * 1.3
 
+
 class Motor:
     def __init__(self, EnaA, In1A, In2A, EnaB, In1B, In2B):
         self.EnaA = EnaA

@@ -7,8 +7,8 @@ LIDAR_RESOLUTION = 360
 # Constant screen width
 SCREEN_WIDTH = 800
 # Selected positions in a frame (result of the Sklearn SelectKBest function)
-DECISIVE_FRAME_POSITIONS = [3, 6, 8, 10, 13, 18, 25, 28, 239, 248, 252, 290, 294, 295, 296, 297, 298, 302,
-                            304, 308, 309, 311, 312, 314, 315, 318, 319, 321, 324, 359]
+DECISIVE_FRAME_POSITIONS = [24, 29, 31, 35, 38, 39, 40, 41, 42, 43, 44, 45, 47, 50, 54, 55, 57, 302,
+                            304, 312, 314, 315, 316, 318, 319, 321, 324, 326, 328, 330]
 
 
 def run():

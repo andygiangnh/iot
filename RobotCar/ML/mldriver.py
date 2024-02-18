@@ -2,8 +2,8 @@ import pickle
 import pandas as pd
 from io import StringIO
 
-selected_feature_indices = [24, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 43, 44, 46, 50, 51, 150, 156, 202, 206,
-                            212, 213, 324, 330, 333, 335, 337, 359]
+selected_feature_indices = [24, 29, 31, 35, 38, 39, 40, 41, 42, 43, 44, 45, 47, 50, 54, 55, 57, 302,
+                            304, 312, 314, 315, 316, 318, 319, 321, 324, 326, 328, 330]
 
 filename = 'self_driving_model_0.1.pkl'
 # Load the model from disk
