@@ -11,8 +11,8 @@ DECISIVE_FRAME_POSITIONS = [24, 29, 31, 35, 38, 39, 40, 41, 42, 43, 44, 45, 47, 
                             304, 312, 314, 315, 316, 318, 319, 321, 324, 326, 328, 330]
 
 
-def run():
-    data_manager = DataManager('./data/run2/__out.txt', 'data/run2/_out.txt', False)
+def run(highlight_frames = True):
+    data_manager = DataManager('./data/run2/corrected_data.txt', 'data/run2/_out.txt', False)
     pygame.init()
     clock = pygame.time.Clock()
     # Set up the drawing window
@@ -69,7 +69,8 @@ def run():
                 # depend on the average distance, divide distance with a constant for better view
                 # provide zoom in/out effect
                 a = float(distances[x]) / 3.5
-                if x in DECISIVE_FRAME_POSITIONS:
+
+                if x in DECISIVE_FRAME_POSITIONS and highlight_frames:
                     # draw line to the point
                     pygame.draw.line(screen, (255, 0, 255), (SCREEN_WIDTH / 2, SCREEN_WIDTH / 2),
                                      (math.cos(x / 180 * math.pi) * a + SCREEN_WIDTH / 2,
@@ -133,4 +134,4 @@ def run():
 
 
 if __name__ == '__main__':
-    run()
+    run(True)
