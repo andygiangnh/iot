@@ -9,6 +9,10 @@ uint16_t sensorValues[SensorCount];
 int manualCalibration = 0;
 
 // PID Properties
+// Assuming dt (delta time) is constant, it is incoporated into the PID constants and tune the K values instead
+// KP' = KP
+// KI' = KI * dt
+// KD' = KD / dt
 const double KP = 0.15;
 const double KI = 0.05;
 const double KD = 0.32;
