@@ -10,8 +10,10 @@ int manualCalibration = 0;
 
 // PID Properties
 const double KP = 0.15;
+const double KI = 0.05;
 const double KD = 0.32;
 double lastError = 0;
+double integral = 0;
 const int GOAL = 2000;
 int MAX_SPEED = 120;
 int autoMode = 0;
@@ -26,6 +28,14 @@ char command;
 int speed;
 int turnSpeed;
 int pump = 9;
+
+// Kalman Filter constants and variables
+double kalmanError = 0;
+double P = 1;
+const double Q = 0.1;
+const double R = 0.1;
+double K = 0;
+double x = 0; // estimated error
 
 void setup()
 {
@@ -113,11 +123,17 @@ void loop()
     // Compute error from line
     int error = GOAL - position;
 
+    // Update Kalman Filter
+    kalmanError = kalmanFilter(error);
+
+    // Compute integral
+    integral += kalmanError;
+
     // Compute motor adjustment
-    int adjustment = KP*error + KD*(error - lastError);
+    int adjustment = KP*kalmanError + KI*integral + KD*(kalmanError - lastError);
 
     // Store error for next increment
-    lastError = error;
+    lastError = kalmanError;
 
     // Adjust motors 
     int leftOut = constrain(MAX_SPEED - adjustment, 0, MAX_SPEED);
@@ -225,6 +241,18 @@ void loop()
     }
   }
 
+}
+
+double kalmanFilter(double error) {
+  // Prediction update
+  P = P + Q;
+
+  // Measurement update
+  K = P / (P + R);
+  x = x + K * (error - x);
+  P = (1 - K) * P;
+
+  return x;
 }
 
 void forward(int speed)
