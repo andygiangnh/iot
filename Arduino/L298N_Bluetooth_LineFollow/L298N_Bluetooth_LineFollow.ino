@@ -27,7 +27,6 @@ int in4Pin = 8;
 char command;
 int speed;
 int turnSpeed;
-int pump = 9;
 
 // Kalman Filter constants and variables
 double kalmanError = 0;
@@ -161,12 +160,7 @@ void loop()
         turnSpeed = 0;
         break;
       case 'V':
-        digitalWrite(pump, HIGH);
-        break;
-      case 'v':
-        digitalWrite(pump, LOW);
-        speed = 0;
-        turnSpeed = 0;
+        calibrateLineSensor();
         break;
       case 'F':
         forward(speed);
